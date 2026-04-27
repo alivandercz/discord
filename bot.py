@@ -8,7 +8,7 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 CODES_MESSAGE = os.getenv(
     "CODES_MESSAGE",
-    "Zde jsou aktuální kódy:\n\n"
+    "Current secret codes:\n\n"
     "• `KOD123` — 500 mincí\n"
     "• `BONUS456` — prémiový předmět\n"
     "• `VITEJ789` — uvítací balíček\n\n"
@@ -38,7 +38,7 @@ async def codes(interaction: discord.Interaction):
     try:
         await interaction.user.send(CODES_MESSAGE)
         await interaction.response.send_message(
-            "Kódy ti byly zaslány do soukromé zprávy!", ephemeral=True
+            "Codes have been just send to your DM!", ephemeral=True
         )
     except discord.Forbidden:
         await interaction.response.send_message(
