@@ -9,6 +9,10 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 CODES_FILE = "codes.txt"
 DEFAULT_MESSAGE = "Žádné kódy zatím nebyly nastaveny."
 
+CODES_CHANNEL_ID = 1498405553838489763
+TAG_MEMBER_ROLE_ID = 1498406704738599013
+TAG_GUIDE_IMAGE = "tag_guide.png"
+
 
 def load_codes() -> str:
     if os.path.exists(CODES_FILE):
@@ -25,6 +29,8 @@ def save_codes(message: str):
 class Bot(discord.Client):
     def __init__(self):
         intents = discord.Intents.default()
+        intents.message_content = True
+        intents.members = True
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
 
@@ -34,6 +40,51 @@ class Bot(discord.Client):
 
     async def on_ready(self):
         print(f"Přihlášen jako {self.user} (ID: {self.user.id})")
+
+    async def on_message(self, message: discord.Message):
+        if message.author.bot:
+            return
+
+        if message.channel.id != CODES_CHANNEL_ID:
+            return
+
+        if message.content.strip().lower() != "done":
+            return
+
+        member = message.author
+        guild = message.guild
+
+        has_tag = (
+            hasattr(member, "clan")
+            and member.clan is not None
+            and member.clan.guild_id == guild.id
+        )
+
+        tag_role = guild.get_role(TAG_MEMBER_ROLE_ID)
+
+        if has_tag:
+            if tag_role:
+                await member.add_roles(tag_role)
+            await message.channel.send(
+                f"✅ {member.mention} Role ti byla přiřazena, kódy si vyžádej pomocí `/codes`!",
+                delete_after=15,
+            )
+        else:
+            warning = (
+                f"⚠️ Hey {member.mention}, you MUST have our tag applied to be able to get the secret codes. "
+                f'Then type "Done" again.'
+            )
+            if os.path.exists(TAG_GUIDE_IMAGE):
+                await message.channel.send(
+                    warning, file=discord.File(TAG_GUIDE_IMAGE)
+                )
+            else:
+                await message.channel.send(warning)
+
+        try:
+            await message.delete()
+        except discord.Forbidden:
+            pass
 
 
 bot = Bot()
