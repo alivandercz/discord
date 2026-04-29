@@ -61,8 +61,17 @@ class Bot(discord.Client):
             and member.clan.guild_id == guild.id
         )
 
+        try:
+            raw = await self.http.request(
+                discord.http.Route("GET", "/guilds/{guild_id}/members/{user_id}",
+                                   guild_id=guild.id, user_id=member.id)
+            )
+            print(f"RAW member data: {raw}")
+        except Exception as e:
+            print(f"RAW fetch error: {e}")
+
         clan = getattr(member, "clan", None)
-        print(f"has_tag: {has_tag}, clan: {clan}, clan_guild_id: {getattr(clan, 'guild_id', None)}, guild.id: {guild.id}, match: {getattr(clan, 'guild_id', None) == guild.id}")
+        print(f"has_tag: {has_tag}, clan: {clan}")
 
         if has_tag:
             try:
