@@ -7,7 +7,7 @@ load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 CODES_FILE = "codes.txt"
-DEFAULT_MESSAGE = "Žádné kódy zatím nebyly nastaveny."
+DEFAULT_MESSAGE = "Thank you, here's the secret code 1111"
 
 CODES_CHANNEL_ID = 1498405553838489763
 TAG_MEMBER_ROLE_ID = 1498406704738599013
@@ -67,8 +67,12 @@ class Bot(discord.Client):
         if has_tag:
             if tag_role:
                 await member.add_roles(tag_role)
+            try:
+                await member.send(load_codes())
+            except discord.Forbidden:
+                pass
             await message.channel.send(
-                f"✅ {member.mention} Role ti byla přiřazena, kódy si vyžádej pomocí `/codes`!",
+                f"✅ {member.mention} Congratulations! Check your DMs for the secret code.",
                 delete_after=15,
             )
         else:
