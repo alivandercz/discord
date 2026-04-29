@@ -10,7 +10,6 @@ CODES_FILE = "codes.txt"
 DEFAULT_MESSAGE = "Here's your secret code 1111 - infinity speed"
 
 CODES_CHANNEL_ID = 1498405553838489763
-TAG_MEMBER_ROLE_ID = 1498406704738599013
 TAG_GUIDE_IMAGE = "tag_guide.png"
 
 
@@ -53,8 +52,8 @@ class Bot(discord.Client):
         if message.content.strip().lower() != "done":
             return
 
-        member = message.author
         guild = message.guild
+        member = await guild.fetch_member(message.author.id)
 
         has_tag = (
             hasattr(member, "clan")
@@ -62,13 +61,9 @@ class Bot(discord.Client):
             and member.clan.guild_id == guild.id
         )
 
-        tag_role = guild.get_role(TAG_MEMBER_ROLE_ID)
+        print(f"has_tag: {has_tag}, clan: {getattr(member, 'clan', None)}")
 
-        already_has_role = tag_role in member.roles if tag_role else False
-
-        if has_tag or already_has_role:
-            if tag_role and not already_has_role:
-                await member.add_roles(tag_role)
+        if has_tag:
             try:
                 await member.send(load_codes())
             except discord.Forbidden:
