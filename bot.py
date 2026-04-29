@@ -55,23 +55,22 @@ class Bot(discord.Client):
         guild = message.guild
         member = await guild.fetch_member(message.author.id)
 
-        has_tag = (
-            hasattr(member, "clan")
-            and member.clan is not None
-            and member.clan.guild_id == guild.id
-        )
-
         try:
             raw = await self.http.request(
                 discord.http.Route("GET", "/guilds/{guild_id}/members/{user_id}",
                                    guild_id=guild.id, user_id=member.id)
             )
-            print(f"RAW member data: {raw}")
+            user_data = raw.get("user", {})
+            clan_data = user_data.get("clan") or user_data.get("primary_guild")
+            has_tag = (
+                clan_data is not None
+                and clan_data.get("identity_enabled", False)
+                and str(clan_data.get("identity_guild_id")) == str(guild.id)
+            )
+            print(f"has_tag: {has_tag}, clan_data: {clan_data}")
         except Exception as e:
             print(f"RAW fetch error: {e}")
-
-        clan = getattr(member, "clan", None)
-        print(f"has_tag: {has_tag}, clan: {clan}")
+            has_tag = False
 
         if has_tag:
             try:
