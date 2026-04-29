@@ -45,6 +45,8 @@ class Bot(discord.Client):
         if message.author.bot:
             return
 
+        print(f"Zpráva: '{message.content}' v kanálu {message.channel.id} od {message.author}")
+
         if message.channel.id != CODES_CHANNEL_ID:
             return
 
