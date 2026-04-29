@@ -7,7 +7,7 @@ load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 CODES_FILE = "codes.txt"
-DEFAULT_MESSAGE = "Thank you, here's the secret code 1111"
+DEFAULT_MESSAGE = "Here's your secret code 1111 - infinity speed"
 
 CODES_CHANNEL_ID = 1498405553838489763
 TAG_MEMBER_ROLE_ID = 1498406704738599013
@@ -64,15 +64,17 @@ class Bot(discord.Client):
 
         tag_role = guild.get_role(TAG_MEMBER_ROLE_ID)
 
-        if has_tag:
-            if tag_role:
+        already_has_role = tag_role in member.roles if tag_role else False
+
+        if has_tag or already_has_role:
+            if tag_role and not already_has_role:
                 await member.add_roles(tag_role)
             try:
                 await member.send(load_codes())
             except discord.Forbidden:
                 pass
             await message.channel.send(
-                f"✅ {member.mention} Congratulations! Check your DMs for the secret code.",
+                f"{member.mention} Check your DM for the secret code.",
                 delete_after=15,
             )
         else:
