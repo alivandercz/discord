@@ -61,7 +61,8 @@ class Bot(discord.Client):
             and member.clan.guild_id == guild.id
         )
 
-        print(f"has_tag: {has_tag}, clan: {getattr(member, 'clan', None)}")
+        clan = getattr(member, "clan", None)
+        print(f"has_tag: {has_tag}, clan: {clan}, clan_guild_id: {getattr(clan, 'guild_id', None)}, guild.id: {guild.id}, match: {getattr(clan, 'guild_id', None) == guild.id}")
 
         if has_tag:
             try:
