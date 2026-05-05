@@ -51,6 +51,7 @@ class Bot(discord.Client):
 
         guild = message.guild
         member = await guild.fetch_member(message.author.id)
+        print(f"fetch_member OK: {member}")
 
         try:
             raw = await self.http.request(
@@ -64,30 +65,35 @@ class Bot(discord.Client):
                 and clan_data.get("identity_enabled", False)
                 and str(clan_data.get("identity_guild_id")) == str(guild.id)
             )
+            print(f"has_tag: {has_tag}, clan_data: {clan_data}")
         except Exception as e:
             print(f"RAW fetch error: {e}")
             has_tag = False
 
-        if has_tag:
-            try:
-                await member.send(load_codes())
-            except discord.Forbidden:
-                pass
-            await message.channel.send(
-                f"{member.mention} Check your DM for the secret code.",
-                delete_after=15,
-            )
-        else:
-            warning = (
-                f"⚠️ Hey {member.mention}, you MUST have our tag applied to be able to get the secret codes. "
-                f'Then type "Done" again.'
-            )
-            if os.path.exists(TAG_GUIDE_IMAGE):
+        try:
+            if has_tag:
+                try:
+                    await member.send(load_codes())
+                except discord.Forbidden:
+                    print("DM zakázáno")
                 await message.channel.send(
-                    warning, file=discord.File(TAG_GUIDE_IMAGE)
+                    f"{member.mention} Check your DM for the secret code.",
+                    delete_after=15,
                 )
             else:
-                await message.channel.send(warning)
+                warning = (
+                    f"⚠️ Hey {member.mention}, you MUST have our tag applied to be able to get the secret codes. "
+                    f'Then type "Done" again.'
+                )
+                print(f"image exists: {os.path.exists(TAG_GUIDE_IMAGE)}")
+                if os.path.exists(TAG_GUIDE_IMAGE):
+                    await message.channel.send(
+                        warning, file=discord.File(TAG_GUIDE_IMAGE)
+                    )
+                else:
+                    await message.channel.send(warning)
+        except Exception as e:
+            print(f"Chyba při odesílání: {e}")
 
         try:
             await message.delete()
