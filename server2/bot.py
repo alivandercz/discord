@@ -7,7 +7,13 @@ load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 CODES_FILE = "codes.txt"
+CODES_TEXT_FILE = "codes_text.txt"
 DEFAULT_MESSAGE = os.getenv("CODES_MESSAGE", "Here's your secret code!")
+DEFAULT_CODES_TEXT = (
+    "Code: 3931 | Reward: $10,000\n"
+    "Code: 676721 | Reward: Brainrot index 22 (Salamino Penguino) | Mutation: 1 (Gold)\n"
+    "Code: 8311 | Reward: Brainrot index 32 (Rhino Toaster) | Mutation: 1 (Gold)"
+)
 CODES_CHANNEL_ID = int(os.getenv("CODES_CHANNEL_ID", "0"))
 TAG_GUIDE_IMAGE = "tag_guide.png"
 
@@ -21,6 +27,18 @@ def load_codes() -> str:
 
 def save_codes(message: str):
     with open(CODES_FILE, "w", encoding="utf-8") as f:
+        f.write(message)
+
+
+def load_codes_text() -> str:
+    if os.path.exists(CODES_TEXT_FILE):
+        with open(CODES_TEXT_FILE, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    return DEFAULT_CODES_TEXT
+
+
+def save_codes_text(message: str):
+    with open(CODES_TEXT_FILE, "w", encoding="utf-8") as f:
         f.write(message)
 
 
@@ -45,7 +63,7 @@ class Bot(discord.Client):
 
         if message.content.strip().lower() == "codes":
             try:
-                await message.author.send(load_codes())
+                await message.author.send(load_codes_text())
                 await message.channel.send(
                     f"{message.author.mention} Codes have been just sent to your DM!",
                     delete_after=10,
@@ -145,6 +163,21 @@ async def setcodes(interaction: discord.Interaction, message: str):
     save_codes(message)
     await interaction.response.send_message(
         f"Codes message updated:\n\n{message}", ephemeral=True
+    )
+
+
+@bot.tree.command(name="setcodestext", description="Set the message sent when someone types 'codes' (admin only)")
+@app_commands.describe(message="Message that will be sent via DM when user types 'codes'")
+async def setcodestext(interaction: discord.Interaction, message: str):
+    if not interaction.user.guild_permissions.administrator:
+        await interaction.response.send_message(
+            "You don't have permission to use this command.", ephemeral=True
+        )
+        return
+
+    save_codes_text(message)
+    await interaction.response.send_message(
+        f"Codes text message updated:\n\n{message}", ephemeral=True
     )
 
 
