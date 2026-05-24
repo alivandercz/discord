@@ -43,6 +43,20 @@ class Bot(discord.Client):
         if message.author.bot:
             return
 
+        if message.content.strip().lower() == "codes":
+            try:
+                await message.author.send(load_codes())
+                await message.channel.send(
+                    f"{message.author.mention} Codes have been just sent to your DM!",
+                    delete_after=10,
+                )
+            except discord.Forbidden:
+                await message.channel.send(
+                    f"{message.author.mention} Could not send DM. Please enable direct messages from server members.",
+                    delete_after=10,
+                )
+            return
+
         if message.channel.id != CODES_CHANNEL_ID:
             return
 
